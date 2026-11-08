@@ -358,7 +358,7 @@ namespace Songco
 
                     File.AppendAllLines(FilePathHistory, Report);
                     Console.Clear();
-                    Console.WriteLine("Summary Saved Successfull!");
+                    Console.WriteLine("Summary Saved Successfully!");
                     Thread.Sleep(1500);
                 }
                 else
