@@ -120,7 +120,7 @@ namespace Songco
 
             string FilePath = "Denomination.txt";
 
-            //Categorized Regular and Part-Time
+            // Categorize Regular and Part-Time once
             if (File.Exists(FilePath))
             {
                 foreach (string line in File.ReadAllLines(FilePath))
@@ -176,8 +176,10 @@ namespace Songco
                 }
                 else
                 {
-                    while (true)
+                    bool menuSelected = false;
+                    while (!menuSelected)
                     {
+                        Console.Clear();
                         Console.WriteLine("Both Regular and Part-Timer records detected.");
                         Console.WriteLine("[1] Regular Employees");
                         Console.WriteLine("[2] Part-Time Employees");
@@ -189,13 +191,13 @@ namespace Songco
                         {
                             CurrentSelected = RegularEmployees;
                             Status = CurrentSelected[0].EmploymentStatus();
-                            break;
+                            menuSelected = true;
                         }
                         else if (choice.Key == ConsoleKey.D2)
                         {
                             CurrentSelected = PartTimeEmployees;
                             Status = CurrentSelected[0].EmploymentStatus();
-                            break;
+                            menuSelected = true;
                         }
                         else if (choice.Key == ConsoleKey.D3)
                         {
@@ -222,9 +224,7 @@ namespace Songco
                                     File.WriteAllText(historyFilePath, string.Empty);
                                     Console.WriteLine("\n\nHistory cleared successfully!");
                                     Thread.Sleep(1500);
-                                    Console.Clear();
                                 }
-                                Console.Clear();
                             }
                             else
                             {
@@ -232,14 +232,12 @@ namespace Songco
                                 Console.WriteLine("History file is empty or hasn't been created yet!");
                                 Console.WriteLine("\nPress any key to go back...");
                                 Console.ReadKey();
-                                Console.Clear();
                             }
                         }
                         else
                         {
                             Console.WriteLine("Invalid Input! Only 1, 2, or 3, Try Again!");
                             Thread.Sleep(1000);
-                            Console.Clear();
                         }
                     }
                 }
@@ -256,12 +254,12 @@ namespace Songco
                 if (CentsIncluded)
                 {
                     Console.WriteLine($"{"#",4} |{"Name",-31}|{"Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |{".25",7} |{".10",7} |{".05",7} |{".01",7} |");
-                    Console.WriteLine(new string('=', 171));
+                    Console.WriteLine(new string('=', 170));
                 }
                 else
                 {
                     Console.WriteLine($"{"#",4} |{"Name",-31}|{"Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
-                    Console.WriteLine(new string('=', 135));
+                    Console.WriteLine(new string('=', 134));
                 }
                 Console.ResetColor();
 
@@ -312,31 +310,31 @@ namespace Songco
                 //Label
                 if (CentsIncluded)
                 {
-                    Console.WriteLine(new string('=', 171));
+                    Console.WriteLine(new string('=', 170));
                     Console.WriteLine($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |{".25",7} |{".10",7} |{".05",7} |{".01",7} |");
                 }
                 else
                 {
-                    Console.WriteLine(new string('=', 135));
+                    Console.WriteLine(new string('=', 134));
                     Console.WriteLine($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
                 }
 
                 //Denomination
                 if (CentsIncluded)
                 {
-                    Console.WriteLine(new string('=', 171));
+                    Console.WriteLine(new string('=', 170));
                     Console.WriteLine($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N2} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |{Total25C,7} |{Total10C,7} |{Total5C,7} |{Total1C,7} |");
-                    Console.WriteLine(new string('=', 171));
+                    Console.WriteLine(new string('=', 170));
                 }
                 else
                 {
-                    Console.WriteLine(new string('=', 135));
+                    Console.WriteLine(new string('=', 134));
                     Console.WriteLine($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N0} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |");
-                    Console.WriteLine(new string('=', 135));
+                    Console.WriteLine(new string('=', 134));
                 }
                 Console.ResetColor();
-
-                Console.WriteLine("\nPress Any Key to go back to the selection menu, or Type \"SAVE\" to save the result summary.");
+                Console.WriteLine();
+                Console.WriteLine("Press Any Key to go back to the selection menu, or Type \"SAVE\" to save the result summary.");
                 string Enter = Console.ReadLine();
 
                 if (Enter.ToUpper().Trim() == "SAVE")
@@ -365,10 +363,6 @@ namespace Songco
                     Console.Clear();
                     Console.WriteLine("Summary Saved Successfully!");
                     Thread.Sleep(1500);
-                }
-                else
-                {
-                    continue;
                 }
             }
         }
