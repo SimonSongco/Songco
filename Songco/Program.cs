@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace Songco
 {
@@ -9,6 +10,9 @@ namespace Songco
     public class DenominationCalculator
     {
         private decimal _salary;
+        private bool _includeCents;
+
+        public decimal Salary { get; private set; }
         public int Thousand { get; private set; }
         public int FiveHundred { get; private set; }
         public int Hundred { get; private set; }
@@ -18,14 +22,28 @@ namespace Songco
         public int Five { get; private set; }
         public int One { get; private set; }
 
-        public DenominationCalculator(decimal salary)
+        public int TwentyFiveCents { get; private set; }
+        public int TenCents { get; private set; }
+        public int FiveCents { get; private set; }
+        public int OneCents { get; private set; }
+
+        public DenominationCalculator(decimal salary, bool includeCents)
         {
             _salary = salary;
+            _includeCents = includeCents;
             CalculateDenominations();
         }
         private void CalculateDenominations()
         {
             decimal Remaining = _salary;
+
+            if (!_includeCents)
+            {
+                Remaining = (int)Remaining;
+            }
+
+            Salary = Remaining;
+
             Thousand = (int)(Remaining / 1000); Remaining = Remaining % 1000;
             FiveHundred = (int)(Remaining / 500); Remaining = Remaining % 500;
             Hundred = (int)(Remaining / 100); Remaining = Remaining % 100;
@@ -34,6 +52,14 @@ namespace Songco
             Ten = (int)(Remaining / 10); Remaining = Remaining % 10;
             Five = (int)(Remaining / 5); Remaining = Remaining % 5;
             One = (int)(Remaining / 1); Remaining = Remaining % 1;
+
+            if (_includeCents)
+            {
+                TwentyFiveCents = (int)(Remaining / 0.25m); Remaining = Remaining % 0.25m;
+                TenCents = (int)(Remaining / 0.10m); Remaining = Remaining % 0.10m;
+                FiveCents = (int)(Remaining / 0.05m); Remaining = Remaining % 0.05m;
+                OneCents = (int)(Remaining / 0.01m); Remaining = Remaining % 0.01m;
+            }
         }
     }
 
@@ -53,6 +79,7 @@ namespace Songco
     }
 
     //Inheritance
+    //Polymorphism
     public class RegularEmployee : Employee
     {
         public RegularEmployee(string name, decimal salary) : base(name, salary) { }
@@ -71,106 +98,232 @@ namespace Songco
         }
     }
 
-
     internal class Program
     {
-        static void PrintRow(string name, decimal salary, DenominationCalculator denomination)
+        static void PrintRow(int rowNumber, string name, decimal salary, DenominationCalculator denomination, bool includeCents)
         {
-            string displayName = name.Length <= 26 ? name : name.Substring(0, 26);
+            string displayName = name.Length <= 29 ? name : name.Substring(0, 29);
 
-            Console.WriteLine($"{displayName,-28}|{salary,11} |{denomination.Thousand,5} |{denomination.FiveHundred,5} |{denomination.Hundred,5} |{denomination.Fifty,5} |{denomination.Twenty,5} |{denomination.Ten,5} |{denomination.Five,5} |{denomination.One,5} |");
+            if (includeCents)
+            {
+                Console.WriteLine($"{rowNumber,4} |{displayName,-31}|{salary,14:N2} |{denomination.Thousand,8} |{denomination.FiveHundred,8} |{denomination.Hundred,8} |{denomination.Fifty,8} |{denomination.Twenty,8} |{denomination.Ten,8} |{denomination.Five,8} |{denomination.One,8} |{denomination.TwentyFiveCents,7} |{denomination.TenCents,7} |{denomination.FiveCents,7} |{denomination.OneCents,7} |");
+            }
+            else
+            {
+                Console.WriteLine($"{rowNumber,4} |{displayName,-31}|{denomination.Salary,14:N0} |{denomination.Thousand,8} |{denomination.FiveHundred,8} |{denomination.Hundred,8} |{denomination.Fifty,8} |{denomination.Twenty,8} |{denomination.Ten,8} |{denomination.Five,8} |{denomination.One,8} |");
+            }
         }
         static void Main(string[] args)
         {
-            List<Employee> employees = new List<Employee>();
+            List<Employee> RegularEmployees = new List<Employee>();
+            List<Employee> PartTimeEmployees = new List<Employee>();
 
-            string RegularFilePath = "Regular.txt";
-            string PartTimerFilePath = "PartTimer.txt";
+            string FilePath = "Denomination.txt";
 
-            foreach (string line in File.ReadAllLines(RegularFilePath))
+            if (File.Exists(FilePath))
             {
-                string[] parts = line.Split('\t');
-
-                if (parts.Length >= 2)
+                foreach (string line in File.ReadAllLines(FilePath))
                 {
-                    string name = parts[0].Trim();
-                    string value = parts[1].Trim().Replace(",", "");
+                    string[] parts = line.Split('\t');
 
-                    decimal.TryParse(value , out var salary);
+                    if (parts.Length >= 2)
+                    {
+                        string name = parts[0].Trim();
+                        string value = parts[1].Trim();
+                        string position = parts[2].Trim();
 
-                    employees.Add(new RegularEmployee(name, salary));
+                        decimal.TryParse(value, out var salary);
+
+                        if (parts[2].ToUpper() == "REGULAR")
+                        {
+                            RegularEmployees.Add(new RegularEmployee(name, salary));
+                        }
+                        else if (parts[2].ToUpper() == "PART-TIMER")
+                        {
+                            PartTimeEmployees.Add(new PartTimeEmployee(name, salary));
+                        }
+                    }
                 }
             }
 
-            foreach (string line in File.ReadAllLines(PartTimerFilePath))
+            bool Regulars = RegularEmployees.Count > 0;
+            bool PartTimers = PartTimeEmployees.Count > 0;
+
+            if (!Regulars && !PartTimers)
             {
-                string[] parts = line.Split('\t');
-
-                if (parts.Length >= 2)
-                {
-                    string name = parts[0].Trim();
-                    string value = parts[1].Trim().Replace(",", "");
-
-                    decimal.TryParse(value, out var salary);
-
-                    employees.Add(new PartTimeEmployee(name, salary));
-                }
+                Console.WriteLine("Empty Files Found!");
+                Console.ReadKey();
+                return;
             }
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-
-            Console.WriteLine($"{"Name",-28}|{"Salary",11} |{"1000",5} |{"500",5} |{"100",5} |{"50",5} |{"20",5} |{"10",5} |{"5",5} |{"1",5} |");
-            Console.WriteLine(new string('=', 98));
-            Console.ResetColor();
-
-            decimal TotalSalary = 0;
-            int TotalThousand = 0;
-            int TotalFiveHundred = 0;
-            int TotalHundred = 0;
-            int TotalFifty = 0;
-            int TotalTwenty = 0;
-            int TotalTen = 0;
-            int TotalFive = 0;
-            int TotalOne = 0;
-
-            int Row = 0;
-            foreach (Employee employee in employees)
+            // Outer Loop To Allow Going Back To The Decision Menu
+            while (true)
             {
-                if (Row % 2 == 0)
+                Console.Clear();
+                List<Employee> CurrentSelected = new List<Employee>();
+
+                if (Regulars && !PartTimers)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.BackgroundColor = ConsoleColor.White;
+                    CurrentSelected = RegularEmployees;
+                }
+                else if (!Regulars && PartTimers)
+                {
+                    CurrentSelected = PartTimeEmployees;
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.BackgroundColor = ConsoleColor.DarkGray;
+                    while (true)
+                    {
+                        Console.WriteLine("Both Regular and Part-Timer records detected.");
+                        Console.WriteLine("[1] Regular Employees");
+                        Console.WriteLine("[2] Part-Time Employees");
+                        Console.Write("Choose an option (1-2): ");
+                        string choice = Console.ReadLine();
+
+                        if (choice == "1")
+                        {
+                            CurrentSelected = RegularEmployees;
+                            break;
+                        }
+                        else if (choice == "2")
+                        {
+                            CurrentSelected = PartTimeEmployees;
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid Input! Only 1 and 2, Try Again!");
+                            Thread.Sleep(1000);
+                            Console.Clear();
+                        }
+                    }
                 }
 
-                DenominationCalculator denomination = new DenominationCalculator(employee.Salary);
-                PrintRow(employee.Name, employee.Salary, denomination);
+                Console.Write("Include Cent Denominations? (.25, .10, .05, .01) \n(Y/N): ");
+                bool CentsIncluded = Console.ReadLine().Trim().ToUpper() == "Y";
+                string Status = (CurrentSelected.FirstOrDefault() is RegularEmployee) ? "Regular" : "Part-Timer";
 
-                TotalSalary += employee.Salary;
-                TotalThousand += denomination.Thousand;
-                TotalFiveHundred += denomination.FiveHundred;
-                TotalHundred += denomination.Hundred;
-                TotalFifty += denomination.Fifty;
-                TotalTwenty += denomination.Twenty;
-                TotalTen += denomination.Ten;
-                TotalFive += denomination.Five;
-                TotalOne += denomination.One;
 
-                Row++;
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.DarkGreen;
+
+                //Header
+                if (CentsIncluded)
+                {
+                    Console.WriteLine($"{"#",4} |{"Name",-31}|{"Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |{".25",7} |{".10",7} |{".05",7} |{".01",7} |");
+                    Console.WriteLine(new string('=', 171));
+                }
+                else
+                {
+                    Console.WriteLine($"{"#",4} |{"Name",-31}|{"Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
+                    Console.WriteLine(new string('=', 135));
+                }
+                Console.ResetColor();
+
+                decimal TotalSalary = 0;
+                int Total1000 = 0; int Total500 = 0; int Total100 = 0; int Total50 = 0;
+                int Total20 = 0; int Total10 = 0; int Total5 = 0; int Total1 = 0;
+                int Total25C = 0; int Total10C = 0; int Total5C = 0; int Total1C = 0;
+
+                int Row = 0;
+                //Calculating Denomination
+                foreach (Employee employee in CurrentSelected)
+                {
+                    if (Row % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.BackgroundColor = ConsoleColor.White;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.BackgroundColor = ConsoleColor.DarkGray;
+                    }
+
+                    DenominationCalculator denomination = new DenominationCalculator(employee.Salary, CentsIncluded);
+                    PrintRow(Row + 1, employee.Name, employee.Salary, denomination, CentsIncluded);
+
+                    TotalSalary += denomination.Salary;
+                    Total1000 += denomination.Thousand;
+                    Total500 += denomination.FiveHundred;
+                    Total100 += denomination.Hundred;
+                    Total50 += denomination.Fifty;
+                    Total20 += denomination.Twenty;
+                    Total10 += denomination.Ten;
+                    Total5 += denomination.Five;
+                    Total1 += denomination.One;
+                    Total25C += denomination.TwentyFiveCents;
+                    Total10C += denomination.TenCents;
+                    Total5C += denomination.FiveCents;
+                    Total1C += denomination.OneCents;
+
+                    Row++;
+                }
+
+                Console.ResetColor();
+                Console.BackgroundColor = ConsoleColor.DarkGreen;
+                Console.ForegroundColor = ConsoleColor.White;
+
+                //Label
+                if (CentsIncluded)
+                {
+                    Console.WriteLine(new string('=', 171));
+                    Console.WriteLine($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |{".25",7} |{".10",7} |{".05",7} |{".01",7} |");
+                }
+                else
+                {
+                    Console.WriteLine(new string('=', 135));
+                    Console.WriteLine($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
+                }
+
+                //Denomination
+                if (CentsIncluded)
+                {
+                    Console.WriteLine(new string('=', 171));
+                    Console.WriteLine($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N2} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |{Total25C,7} |{Total10C,7} |{Total5C,7} |{Total1C,7} |");
+                    Console.WriteLine(new string('=', 171));
+                }
+                else
+                {
+                    Console.WriteLine(new string('=', 135));
+                    Console.WriteLine($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N0} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |");
+                    Console.WriteLine(new string('=', 135));
+                }
+                Console.ResetColor();
+
+                Console.WriteLine("\nPress Any Key to go back to the selection menu, or Type \"SAVE\" to save the results to a file.");
+                string Enter = Console.ReadLine();
+
+                if (Enter.ToUpper().Trim() == "SAVE")
+                {
+                    string FilePathHistory = "History.txt";
+                    List<string> Report = new List<string>();
+
+                    if (CentsIncluded)
+                    {
+                        Report.Add(new string('=', 171));
+                        Report.Add($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |{".25",7} |{".10",7} |{".05",7} |{".01",7} |");
+                        Report.Add(new string('=', 171));
+                        Report.Add($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N2} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |{Total25C,7} |{Total10C,7} |{Total5C,7} |{Total1C,7} |");
+                        Report.Add(new string('=', 171));
+                    }
+                    else
+                    {
+                        Report.Add(new string('=', 135));
+                        Report.Add($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
+                        Report.Add(new string('=', 135));
+                        Report.Add($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N0} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |");
+                        Report.Add(new string('=', 135));
+                    }
+
+                    File.AppendAllLines(FilePathHistory, Report);
+                }
+                else
+                {
+                    continue;
+                }
             }
-
-            Console.ResetColor();
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(new string('=', 98));
-
-            Console.WriteLine($"{"TOTAL",-28}|{TotalSalary,11:N2} |{TotalThousand,5} |{TotalFiveHundred,5} |{TotalHundred,5} |{TotalFifty,5} |{TotalTwenty,5} |{TotalTen,5} |{TotalFive,5} |{TotalOne,5} |");
-            Console.ReadKey();
         }
     }
 }
