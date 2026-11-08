@@ -167,10 +167,12 @@ namespace Songco
                 if (Regulars && !PartTimers)
                 {
                     CurrentSelected = RegularEmployees;
+                    Status = CurrentSelected[0].EmploymentStatus();
                 }
                 else if (!Regulars && PartTimers)
                 {
                     CurrentSelected = PartTimeEmployees;
+                    Status = CurrentSelected[0].EmploymentStatus();
                 }
                 else
                 {
@@ -186,20 +188,20 @@ namespace Songco
                         if (choice.Key == ConsoleKey.D1)
                         {
                             CurrentSelected = RegularEmployees;
-                            Status = "Regular";
+                            Status = CurrentSelected[0].EmploymentStatus();
                             break;
                         }
                         else if (choice.Key == ConsoleKey.D2)
                         {
                             CurrentSelected = PartTimeEmployees;
-                            Status = "Part-Timer";
+                            Status = CurrentSelected[0].EmploymentStatus();
                             break;
                         }
                         else if (choice.Key == ConsoleKey.D3)
                         {
                             string historyFilePath = "History.txt";
 
-                            if (new FileInfo(historyFilePath).Length > 0)
+                            if (File.Exists(historyFilePath) && new FileInfo(historyFilePath).Length > 0)
                             {
                                 Console.Clear();
                                 Console.ForegroundColor = ConsoleColor.Yellow;
