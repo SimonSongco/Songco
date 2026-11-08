@@ -161,6 +161,7 @@ namespace Songco
             {
                 Console.Clear();
                 List<Employee> CurrentSelected = new List<Employee>();
+                string Status = "";
 
                 if (Regulars && !PartTimers)
                 {
@@ -177,22 +178,61 @@ namespace Songco
                         Console.WriteLine("Both Regular and Part-Timer records detected.");
                         Console.WriteLine("[1] Regular Employees");
                         Console.WriteLine("[2] Part-Time Employees");
+                        Console.WriteLine("[3] Show Saved Results");
                         Console.Write("Choose an option (1-2): ");
                         string choice = Console.ReadLine();
 
                         if (choice == "1")
                         {
                             CurrentSelected = RegularEmployees;
+                            Status = "Regular";
                             break;
                         }
                         else if (choice == "2")
                         {
                             CurrentSelected = PartTimeEmployees;
+                            Status = "Part-Timer";
                             break;
+                        }
+                        else if (choice == "3")
+                        {
+                            string historyFilePath = "History.txt";
+
+                            if (new FileInfo(historyFilePath).Length > 0)
+                            {
+                                Console.Clear();
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine(new string('=', 171));
+                                Console.WriteLine(new string(' ', 77) + "SAVED HISTORY LOG");
+                                Console.WriteLine(new string('=', 171));
+                                Console.ResetColor();
+
+                                string historyContent = File.ReadAllText(historyFilePath);
+                                Console.WriteLine(historyContent);
+
+                                Console.WriteLine("\n----------------------------------------------------------------");
+                                Console.Write("Press [C] to clear all history, or any other key to go back: ");
+                                ConsoleKeyInfo keyChoice = Console.ReadKey(true);
+
+                                if (keyChoice.Key == ConsoleKey.C)
+                                {
+                                    File.WriteAllText(historyFilePath, string.Empty);
+                                    Console.WriteLine("\n\nHistory cleared successfully!");
+                                    Thread.Sleep(1500);
+                                }
+                            }
+                            else
+                            {
+                                Console.Clear();
+                                Console.WriteLine("History file is empty or hasn't been created yet!");
+                                Console.WriteLine("\nPress any key to go back...");
+                                Console.ReadKey();
+                                Console.Clear();
+                            }
                         }
                         else
                         {
-                            Console.WriteLine("Invalid Input! Only 1 and 2, Try Again!");
+                            Console.WriteLine("Invalid Input! Only 1, 2, or 3, Try Again!");
                             Thread.Sleep(1000);
                             Console.Clear();
                         }
@@ -201,7 +241,6 @@ namespace Songco
 
                 Console.Write("Include Cent Denominations? (.25, .10, .05, .01) \n(Y/N): ");
                 bool CentsIncluded = Console.ReadLine().Trim().ToUpper() == "Y";
-                string Status = (CurrentSelected.FirstOrDefault() is RegularEmployee) ? "Regular" : "Part-Timer";
 
 
                 Console.Clear();
@@ -292,7 +331,7 @@ namespace Songco
                 }
                 Console.ResetColor();
 
-                Console.WriteLine("\nPress Any Key to go back to the selection menu, or Type \"SAVE\" to save the results to a file.");
+                Console.WriteLine("\nPress Any Key to go back to the selection menu, or Type \"SAVE\" to save the result summary.");
                 string Enter = Console.ReadLine();
 
                 if (Enter.ToUpper().Trim() == "SAVE")
@@ -318,6 +357,9 @@ namespace Songco
                     }
 
                     File.AppendAllLines(FilePathHistory, Report);
+                    Console.Clear();
+                    Console.WriteLine("Summary Saved Successfull!");
+                    Thread.Sleep(1500);
                 }
                 else
                 {
