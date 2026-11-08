@@ -120,6 +120,7 @@ namespace Songco
 
             string FilePath = "Denomination.txt";
 
+            //Categorized Regular and Part-Time
             if (File.Exists(FilePath))
             {
                 foreach (string line in File.ReadAllLines(FilePath))
@@ -241,7 +242,6 @@ namespace Songco
 
                 Console.Write("Include Cent Denominations? (.25, .10, .05, .01) \n(Y/N): ");
                 bool CentsIncluded = Console.ReadLine().Trim().ToUpper() == "Y";
-
 
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.White;
