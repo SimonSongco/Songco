@@ -243,7 +243,7 @@ namespace Songco
                 }
 
                 Console.Clear();
-                Console.Write("Include Cent Denominations? (.25, .10, .05, .01) \n(Y/N): ");
+                Console.Write("Include Cent Denominations? (.25, .10, .05, .01) \n(Press Y): ");
                 bool CentsIncluded = Console.ReadLine().Trim().ToUpper() == "Y";
 
                 Console.Clear();
