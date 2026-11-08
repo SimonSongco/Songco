@@ -180,22 +180,22 @@ namespace Songco
                         Console.WriteLine("[1] Regular Employees");
                         Console.WriteLine("[2] Part-Time Employees");
                         Console.WriteLine("[3] Show Saved Results");
-                        Console.Write("Choose an option (1-2): ");
-                        string choice = Console.ReadLine();
+                        Console.Write("Choose an option (1-3): ");
+                        ConsoleKeyInfo choice = Console.ReadKey(true);
 
-                        if (choice == "1")
+                        if (choice.Key == ConsoleKey.D1)
                         {
                             CurrentSelected = RegularEmployees;
                             Status = "Regular";
                             break;
                         }
-                        else if (choice == "2")
+                        else if (choice.Key == ConsoleKey.D2)
                         {
                             CurrentSelected = PartTimeEmployees;
                             Status = "Part-Timer";
                             break;
                         }
-                        else if (choice == "3")
+                        else if (choice.Key == ConsoleKey.D3)
                         {
                             string historyFilePath = "History.txt";
 
@@ -220,7 +220,9 @@ namespace Songco
                                     File.WriteAllText(historyFilePath, string.Empty);
                                     Console.WriteLine("\n\nHistory cleared successfully!");
                                     Thread.Sleep(1500);
+                                    Console.Clear();
                                 }
+                                Console.Clear();
                             }
                             else
                             {
@@ -240,6 +242,7 @@ namespace Songco
                     }
                 }
 
+                Console.Clear();
                 Console.Write("Include Cent Denominations? (.25, .10, .05, .01) \n(Y/N): ");
                 bool CentsIncluded = Console.ReadLine().Trim().ToUpper() == "Y";
 
