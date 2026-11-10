@@ -167,7 +167,7 @@ namespace Songco
 
                     ConsoleKeyInfo choice = Console.ReadKey(true);
 
-                    if (choice.Key == ConsoleKey.D1 || choice.Key == ConsoleKey.NumPad1)
+                    if (choice.Key == ConsoleKey.D1)
                     {
                         if (RegularEmployees.Count == 0)
                         {
@@ -179,7 +179,7 @@ namespace Songco
                         Status = CurrentSelected[0].EmploymentStatus();
                         menuSelected = true;
                     }
-                    else if (choice.Key == ConsoleKey.D2 || choice.Key == ConsoleKey.NumPad2)
+                    else if (choice.Key == ConsoleKey.D2)
                     {
                         if (PartTimeEmployees.Count == 0)
                         {
@@ -191,7 +191,7 @@ namespace Songco
                         Status = CurrentSelected[0].EmploymentStatus();
                         menuSelected = true;
                     }
-                    else if (choice.Key == ConsoleKey.D3 || choice.Key == ConsoleKey.NumPad3)
+                    else if (choice.Key == ConsoleKey.D3)
                     {
                         string historyFilePath = "History.txt";
 
@@ -230,7 +230,7 @@ namespace Songco
                             Console.ReadKey();
                         }
                     }
-                    else if (choice.Key == ConsoleKey.D4 || choice.Key == ConsoleKey.NumPad4)
+                    else if (choice.Key == ConsoleKey.D4)
                     {
                         return;
                     }
@@ -243,7 +243,8 @@ namespace Songco
 
                 Console.Clear();
                 Console.Write("Include Cent Denominations? (.25, .10, .05, .01) \n(Press Y): ");
-                bool CentsIncluded = Console.ReadLine().Trim().ToUpper() == "Y";
+                ConsoleKeyInfo centChoice = Console.ReadKey(true);
+                bool CentsIncluded = (centChoice.Key == ConsoleKey.Y);
 
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.White;
