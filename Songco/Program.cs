@@ -304,6 +304,7 @@ namespace Songco
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
                 Console.ForegroundColor = ConsoleColor.White;
 
+                //Label
                 if (CentsIncluded)
                 {
                     Console.WriteLine(new string('=', 170));
@@ -315,6 +316,7 @@ namespace Songco
                     Console.WriteLine($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
                 }
 
+                //Displayed
                 if (CentsIncluded)
                 {
                     Console.WriteLine(new string('=', 170));
