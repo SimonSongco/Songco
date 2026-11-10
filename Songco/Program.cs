@@ -6,7 +6,6 @@ using System.Threading;
 
 namespace Songco
 {
-    //Encapsulator
     public class DenominationCalculator
     {
         private decimal _salary;
@@ -33,6 +32,7 @@ namespace Songco
             _includeCents = includeCents;
             CalculateDenominations();
         }
+
         private void CalculateDenominations()
         {
             decimal Remaining = _salary;
@@ -63,7 +63,6 @@ namespace Songco
         }
     }
 
-    //Abstract
     public abstract class Employee
     {
         public string Name { get; protected set; }
@@ -78,8 +77,6 @@ namespace Songco
         public abstract string EmploymentStatus();
     }
 
-    //Inheritance
-    //Polymorphism
     public class RegularEmployee : Employee
     {
         public RegularEmployee(string name, decimal salary) : base(name, salary) { }
@@ -89,9 +86,11 @@ namespace Songco
             return "Regular";
         }
     }
+
     public class PartTimeEmployee : Employee
     {
         public PartTimeEmployee(string name, decimal salary) : base(name, salary) { }
+
         public override string EmploymentStatus()
         {
             return "Part-Timer";
@@ -113,6 +112,7 @@ namespace Songco
                 Console.WriteLine($"{rowNumber,4} |{displayName,-31}|{denomination.Salary,14:N0} |{denomination.Thousand,8} |{denomination.FiveHundred,8} |{denomination.Hundred,8} |{denomination.Fifty,8} |{denomination.Twenty,8} |{denomination.Ten,8} |{denomination.Five,8} |{denomination.One,8} |");
             }
         }
+
         static void Main(string[] args)
         {
             List<Employee> RegularEmployees = new List<Employee>();
@@ -120,26 +120,25 @@ namespace Songco
 
             string FilePath = "Denomination.txt";
 
-            // Categorize Regular and Part-Time once
             if (File.Exists(FilePath))
             {
                 foreach (string line in File.ReadAllLines(FilePath))
                 {
                     string[] parts = line.Split('\t');
 
-                    if (parts.Length >= 2)
+                    if (parts.Length >= 3)
                     {
                         string name = parts[0].Trim();
                         string value = parts[1].Trim();
-                        string position = parts[2].Trim();
+                        string position = parts[2].Trim().ToUpper();
 
                         decimal.TryParse(value, out var salary);
 
-                        if (parts[2].ToUpper() == "REGULAR")
+                        if (position == "REGULAR")
                         {
                             RegularEmployees.Add(new RegularEmployee(name, salary));
                         }
-                        else if (parts[2].ToUpper() == "PART-TIMER")
+                        else if (position == "PART-TIMER" || position == "PART-TIME" || position == "PART TIME")
                         {
                             PartTimeEmployees.Add(new PartTimeEmployee(name, salary));
                         }
@@ -147,98 +146,98 @@ namespace Songco
                 }
             }
 
-            bool Regulars = RegularEmployees.Count > 0;
-            bool PartTimers = PartTimeEmployees.Count > 0;
-
-            if (!Regulars && !PartTimers)
-            {
-                Console.WriteLine("Empty Files Found!");
-                Console.ReadKey();
-                return;
-            }
-
-            // Outer Loop To Allow Going Back To The Decision Menu
             while (true)
             {
-                Console.Clear();
                 List<Employee> CurrentSelected = new List<Employee>();
                 string Status = "";
+                bool menuSelected = false;
 
-                if (Regulars && !PartTimers)
+                while (!menuSelected)
                 {
-                    CurrentSelected = RegularEmployees;
-                    Status = CurrentSelected[0].EmploymentStatus();
-                }
-                else if (!Regulars && PartTimers)
-                {
-                    CurrentSelected = PartTimeEmployees;
-                    Status = CurrentSelected[0].EmploymentStatus();
-                }
-                else
-                {
-                    bool menuSelected = false;
-                    while (!menuSelected)
+                    Console.Clear();
+                    Console.WriteLine("==========================================");
+                    Console.WriteLine("          EMPLOYEE DENOMINATION           ");
+                    Console.WriteLine("==========================================");
+                    Console.WriteLine($"[1] Regular Employees   ({RegularEmployees.Count} found)");
+                    Console.WriteLine($"[2] Part-Time Employees ({PartTimeEmployees.Count} found)");
+                    Console.WriteLine("[3] Show Saved Results (History)");
+                    Console.WriteLine("[4] Exit Program");
+                    Console.WriteLine("==========================================");
+                    Console.Write("Choose an option (1-4): ");
+
+                    ConsoleKeyInfo choice = Console.ReadKey(true);
+
+                    if (choice.Key == ConsoleKey.D1 || choice.Key == ConsoleKey.NumPad1)
                     {
-                        Console.Clear();
-                        Console.WriteLine("Both Regular and Part-Timer records detected.");
-                        Console.WriteLine("[1] Regular Employees");
-                        Console.WriteLine("[2] Part-Time Employees");
-                        Console.WriteLine("[3] Show Saved Results");
-                        Console.Write("Choose an option (1-3): ");
-                        ConsoleKeyInfo choice = Console.ReadKey(true);
-
-                        if (choice.Key == ConsoleKey.D1)
+                        if (RegularEmployees.Count == 0)
                         {
-                            CurrentSelected = RegularEmployees;
-                            Status = CurrentSelected[0].EmploymentStatus();
-                            menuSelected = true;
+                            Console.WriteLine("\n\nNo Regular Employee records found!");
+                            Thread.Sleep(1200);
+                            continue;
                         }
-                        else if (choice.Key == ConsoleKey.D2)
+                        CurrentSelected = RegularEmployees;
+                        Status = CurrentSelected[0].EmploymentStatus();
+                        menuSelected = true;
+                    }
+                    else if (choice.Key == ConsoleKey.D2 || choice.Key == ConsoleKey.NumPad2)
+                    {
+                        if (PartTimeEmployees.Count == 0)
                         {
-                            CurrentSelected = PartTimeEmployees;
-                            Status = CurrentSelected[0].EmploymentStatus();
-                            menuSelected = true;
+                            Console.WriteLine("\n\nNo Part-Time Employee records found!");
+                            Thread.Sleep(1200);
+                            continue;
                         }
-                        else if (choice.Key == ConsoleKey.D3)
+                        CurrentSelected = PartTimeEmployees;
+                        Status = CurrentSelected[0].EmploymentStatus();
+                        menuSelected = true;
+                    }
+                    else if (choice.Key == ConsoleKey.D3 || choice.Key == ConsoleKey.NumPad3)
+                    {
+                        string historyFilePath = "History.txt";
+
+                        if (File.Exists(historyFilePath) && new FileInfo(historyFilePath).Length > 0)
                         {
-                            string historyFilePath = "History.txt";
+                            Console.Clear();
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.BackgroundColor = ConsoleColor.Black;
+                            Console.WriteLine(new string('=', 170));
+                            Console.WriteLine(new string(' ', 77) + "SAVED HISTORY LOG" + new string(' ', 77));
+                            Console.WriteLine(new string('=', 170));
+                            Console.ResetColor();
 
-                            if (File.Exists(historyFilePath) && new FileInfo(historyFilePath).Length > 0)
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.BackgroundColor = ConsoleColor.DarkGreen;
+                            string historyContent = File.ReadAllText(historyFilePath);
+                            Console.WriteLine(historyContent);
+                            Console.ResetColor();
+
+                            Console.WriteLine("\n----------------------------------------------------------------");
+                            Console.Write("Press [C] to clear all history, or any other key to go back: ");
+                            ConsoleKeyInfo keyChoice = Console.ReadKey(true);
+
+                            if (keyChoice.Key == ConsoleKey.C)
                             {
-                                Console.Clear();
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine(new string('=', 171));
-                                Console.WriteLine(new string(' ', 77) + "SAVED HISTORY LOG");
-                                Console.WriteLine(new string('=', 171));
-                                Console.ResetColor();
-
-                                string historyContent = File.ReadAllText(historyFilePath);
-                                Console.WriteLine(historyContent);
-
-                                Console.WriteLine("\n----------------------------------------------------------------");
-                                Console.Write("Press [C] to clear all history, or any other key to go back: ");
-                                ConsoleKeyInfo keyChoice = Console.ReadKey(true);
-
-                                if (keyChoice.Key == ConsoleKey.C)
-                                {
-                                    File.WriteAllText(historyFilePath, string.Empty);
-                                    Console.WriteLine("\n\nHistory cleared successfully!");
-                                    Thread.Sleep(1500);
-                                }
-                            }
-                            else
-                            {
-                                Console.Clear();
-                                Console.WriteLine("History file is empty or hasn't been created yet!");
-                                Console.WriteLine("\nPress any key to go back...");
-                                Console.ReadKey();
+                                File.WriteAllText(historyFilePath, string.Empty);
+                                Console.WriteLine("\n\nHistory cleared successfully!");
+                                Thread.Sleep(1500);
                             }
                         }
                         else
                         {
-                            Console.WriteLine("Invalid Input! Only 1, 2, or 3, Try Again!");
-                            Thread.Sleep(1000);
+                            Console.Clear();
+                            Console.WriteLine("History file is empty or hasn't been created yet!");
+                            Console.WriteLine("\nPress any key to go back...");
+                            Console.ReadKey();
                         }
+                    }
+                    else if (choice.Key == ConsoleKey.D4 || choice.Key == ConsoleKey.NumPad4)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("\n\nInvalid Input! Only 1, 2, 3, or 4. Try Again!");
+                        Thread.Sleep(1000);
                     }
                 }
 
@@ -250,7 +249,6 @@ namespace Songco
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
 
-                //Header
                 if (CentsIncluded)
                 {
                     Console.WriteLine($"{"#",4} |{"Name",-31}|{"Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |{".25",7} |{".10",7} |{".05",7} |{".01",7} |");
@@ -269,7 +267,6 @@ namespace Songco
                 int Total25C = 0; int Total10C = 0; int Total5C = 0; int Total1C = 0;
 
                 int Row = 0;
-                //Calculating Denomination
                 foreach (Employee employee in CurrentSelected)
                 {
                     if (Row % 2 == 0)
@@ -307,7 +304,6 @@ namespace Songco
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
                 Console.ForegroundColor = ConsoleColor.White;
 
-                //Label
                 if (CentsIncluded)
                 {
                     Console.WriteLine(new string('=', 170));
@@ -319,7 +315,6 @@ namespace Songco
                     Console.WriteLine($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
                 }
 
-                //Denomination
                 if (CentsIncluded)
                 {
                     Console.WriteLine(new string('=', 170));
@@ -344,19 +339,19 @@ namespace Songco
 
                     if (CentsIncluded)
                     {
-                        Report.Add(new string('=', 171));
+                        Report.Add(new string('=', 170));
                         Report.Add($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |{".25",7} |{".10",7} |{".05",7} |{".01",7} |");
-                        Report.Add(new string('=', 171));
+                        Report.Add(new string('=', 170));
                         Report.Add($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N2} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |{Total25C,7} |{Total10C,7} |{Total5C,7} |{Total1C,7} |");
-                        Report.Add(new string('=', 171));
+                        Report.Add(new string('=', 170));
                     }
                     else
                     {
-                        Report.Add(new string('=', 135));
+                        Report.Add(new string('=', 134));
                         Report.Add($"{"#",4} |{Status,-31}|{"Total Salary",14} |{"1000",8} |{"500",8} |{"100",8} |{"50",8} |{"20",8} |{"10",8} |{"5",8} |{"1",8} |");
-                        Report.Add(new string('=', 135));
+                        Report.Add(new string('=', 134));
                         Report.Add($"{"",4} |{"TOTAL",-31}|{TotalSalary,14:N0} |{Total1000,8} |{Total500,8} |{Total100,8} |{Total50,8} |{Total20,8} |{Total10,8} |{Total5,8} |{Total1,8} |");
-                        Report.Add(new string('=', 135));
+                        Report.Add(new string('=', 134));
                     }
 
                     File.AppendAllLines(FilePathHistory, Report);
